@@ -1,0 +1,55 @@
+---
+- name: maps
+  hosts: 127.0.0.1
+  connection: local
+  remote_user: vagrant
+  become: yes
+  vars:
+    remote_user: vagrant
+    project_name: maps
+    install_ctb_tiler: false
+    install_gdal: false
+    search_server: www.search.kartan.no
+    project_dir: /home/{{remote_user}}/{{project_name}}
+  tasks:
+  - name: apt get update
+    apt: update_cache=yes
+
+  - apt: name={{ item }} state=present
+    with_items:
+      - git
+      - apt-transport-https 
+      - ca-certificates
+      - apparmor
+
+  - group: name=docker state=present
+  
+  - user: name={{remote_user}} shell=/bin/bash groups=docker append=yes
+
+  - command: newgrp docker
+
+  - apt_key: keyserver="hkp://p80.pool.sks-keyservers.net:80" id="58118E89F3A912897C070ADBF76221572C52609D"
+  
+  - apt_repository: repo='deb https://apt.dockerproject.org/repo ubuntu-xenial main' state=present 
+
+  - name: apt get update
+    apt: update_cache=yes
+
+  - name: get kernel version
+    shell: uname -r
+    register: uname
+
+  - apt: name=linux-image-extra-{{uname.stdout}} state=present
+
+  - name: apt get update
+    apt: update_cache=yes
+
+  - name: install docker engine
+    apt: name=docker-engine
+
+  - name: get deeposm
+    accept_hostkey: True
+    dest: /vagrant/DeepOSM
+    force: yes
+    update: yes
+    repo: https://github.com/trailbehind/DeepOSM
