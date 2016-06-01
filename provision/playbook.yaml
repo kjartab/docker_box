@@ -48,8 +48,9 @@
     apt: name=docker-engine
 
   - name: get deeposm
-    accept_hostkey: True
-    dest: /vagrant/DeepOSM
-    force: yes
-    update: yes
-    repo: https://github.com/trailbehind/DeepOSM
+    git:
+      accept_hostkey: True
+      dest: /vagrant/DeepOSM
+      force: yes
+      update: yes
+      repo: https://github.com/trailbehind/DeepOSM
